@@ -349,7 +349,15 @@
         {{ content_for_layout }}
       </div>
     {%- else -%}
-      {% sections 'header-group' %}
+      <header class="perfora-global-header" style="position:sticky;top:0;z-index:100;background:#2A1250;color:#ffffff;width:100%;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+        <div style="max-width:1100px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;">
+          <a class="logo" href="{{ routes.root_url }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;color:#ffffff;text-decoration:none;">perfora</a>
+          <span style="display:flex;align-items:center;gap:18px;">
+            <a href="{{ routes.root_url }}#shop" style="color:#ffffff;font-weight:500;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:15px;">Shop all</a>
+            <a href="{{ routes.cart_url }}" style="background:#BDF0D6;color:#2A1250;border-radius:99px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;text-decoration:none;display:inline-block;">Cart (<span class="header-cart-count">{{ cart.item_count }}</span>)</a>
+          </span>
+        </div>
+      </header>
 
       <main
         id="MainContent"
@@ -361,7 +369,11 @@
         {{ content_for_layout }}
       </main>
 
-      {% sections 'footer-group' %}
+      <footer style="background:#2A1250;color:#E4D6FF;padding:36px 0;text-align:center;font-size:14px;margin-top:auto;">
+        <div style="max-width:1100px;margin:0 auto;padding:0 20px;">
+          Questions about an order? <a href="https://wa.me/919419600518" style="color:#BDF0D6;font-weight:700;text-decoration:underline;margin-left:4px;">Message us on WhatsApp</a>
+        </div>
+      </footer>
     {%- endif -%}
 
     <ul hidden>

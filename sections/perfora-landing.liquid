@@ -10,19 +10,44 @@
 
 <script>
 // Dynamic Shopify Product Variant Mapping
-window.SHOPIFY_VARIANTS = {
-  0: "{{ all_products['perfora-purple-whitening-toothpaste'].selected_or_first_available_variant.id | default: '' }}",
-  1: "{{ all_products['perfora-activated-charcoal-whitening-toothpaste'].selected_or_first_available_variant.id | default: '' }}",
-  2: "{{ all_products['perfora-teeth-whitening-combo'].selected_or_first_available_variant.id | default: '' }}",
-  3: "{{ all_products['perfora-teeth-whitening-strips'].selected_or_first_available_variant.id | default: '' }}",
-  4: "{{ all_products['perfora-purple-teeth-whitening-strips'].selected_or_first_available_variant.id | default: '' }}",
-  5: "{{ all_products['perfora-purple-teeth-whitening-toothpaste-serum'].selected_or_first_available_variant.id | default: '' }}"
-};
 window.SHOPIFY_STORE_DOMAIN = "{{ shop.permanent_domain | default: shop.domain }}";
+window.SHOPIFY_VARIANTS = window.SHOPIFY_VARIANTS || {};
+
+{% comment %} 1. Try keyword matching on all products in store {% endcomment %}
+{% for prod in collections.all.products %}
+  {% assign t = prod.title | downcase %}
+  {% assign h = prod.handle | downcase %}
+  {% assign vid = prod.selected_or_first_available_variant.id %}
+  {% if t contains 'serum' or h contains 'serum' %}
+    window.SHOPIFY_VARIANTS[5] = "{{ vid }}";
+  {% elsif t contains 'purple' and t contains 'strip' %}
+    window.SHOPIFY_VARIANTS[4] = "{{ vid }}";
+  {% elsif h contains 'purple' and h contains 'strip' %}
+    window.SHOPIFY_VARIANTS[4] = "{{ vid }}";
+  {% elsif t contains 'strip' or h contains 'strip' %}
+    window.SHOPIFY_VARIANTS[3] = "{{ vid }}";
+  {% elsif t contains 'combo' or h contains 'combo' or t contains 'toothbrush' %}
+    window.SHOPIFY_VARIANTS[2] = "{{ vid }}";
+  {% elsif t contains 'charcoal' or h contains 'charcoal' %}
+    window.SHOPIFY_VARIANTS[1] = "{{ vid }}";
+  {% elsif t contains 'purple' or h contains 'purple' %}
+    {% unless t contains 'serum' or t contains 'strip' or h contains 'serum' or h contains 'strip' %}
+      window.SHOPIFY_VARIANTS[0] = "{{ vid }}";
+    {% endunless %}
+  {% endif %}
+{% endfor %}
+
+{% comment %} 2. Fallbacks for standard handles {% endcomment %}
+if (!window.SHOPIFY_VARIANTS[0]) window.SHOPIFY_VARIANTS[0] = "{{ all_products['perfora-purple-whitening-toothpaste'].selected_or_first_available_variant.id | default: '' }}";
+if (!window.SHOPIFY_VARIANTS[1]) window.SHOPIFY_VARIANTS[1] = "{{ all_products['perfora-activated-charcoal-whitening-toothpaste'].selected_or_first_available_variant.id | default: '' }}";
+if (!window.SHOPIFY_VARIANTS[2]) window.SHOPIFY_VARIANTS[2] = "{{ all_products['perfora-teeth-whitening-combo'].selected_or_first_available_variant.id | default: '' }}";
+if (!window.SHOPIFY_VARIANTS[3]) window.SHOPIFY_VARIANTS[3] = "{{ all_products['perfora-teeth-whitening-strips'].selected_or_first_available_variant.id | default: '' }}";
+if (!window.SHOPIFY_VARIANTS[4]) window.SHOPIFY_VARIANTS[4] = "{{ all_products['perfora-purple-teeth-whitening-strips'].selected_or_first_available_variant.id | default: '' }}";
+if (!window.SHOPIFY_VARIANTS[5]) window.SHOPIFY_VARIANTS[5] = "{{ all_products['perfora-purple-teeth-whitening-toothpaste-serum'].selected_or_first_available_variant.id | default: '' }}";
 </script>
 
 <div class="perfora-landing-container">
-<header><div class="wrap"><a class="logo" href="#top">perfora</a><span><a class="navl" href="#shop">Shop all</a><button class="cartbtn" id="open">Cart (<span id="cnt">0</span>)</button></span></div></header>
+<header><div class="wrap"><a class="logo" href="/">perfora</a><span><a class="navl" href="#shop" id="nav-shop">Shop all</a><button class="cartbtn" id="open">Cart (<span id="cnt">0</span>)</button></span></div></header>
 <main id="top">
 <div class="hero"><div class="wrap">
 <div><h1>Brush purple.<span>Smile brighter.</span></h1>
