@@ -1,0 +1,10 @@
+{
+  "sections": {
+    "perfora_landing": {
+      "type": "perfora-landing"
+    }
+  },
+  "order": [
+    "perfora_landing"
+  ]
+}
