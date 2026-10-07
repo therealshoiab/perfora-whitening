@@ -319,6 +319,20 @@
         document.documentElement.classList.add('shopify-design-mode');
       }
     </script>
+  
+    <style>
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: #F6F1FF !important;
+        color: #1D1033 !important;
+      }
+      #MainContent, .perfora-landing-container, .perfora-theme-root, main {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    </style>
+
   </head>
 
   <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
