@@ -1,5 +1,36 @@
+{% comment %}
+  =============================================================================
+  PERFORA PURPLE WHITENING STORE — CUSTOM STANDALONE LANDING PAGE FOR SHOPIFY
+  =============================================================================
+  HOW TO USE:
+  1. In Shopify Admin -> Online Store -> Themes -> Click '...' -> Edit code.
+  2. Under 'Templates', click 'Add a new template':
+     - Type: page
+     - File name: perfora (creates page.perfora.liquid)
+  3. Replace entire contents with this file and save.
+  4. Under 'Online Store' -> 'Pages' -> 'Add page':
+     - Title: Perfora Whitening Store
+     - Theme template: select 'perfora'
+     - Click Save.
+  =============================================================================
+{% endcomment %}
+{% layout none %}
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en"><head>
+
+<script>
+// Dynamic Liquid lookup of Shopify products by handle:
+var SHOPIFY_VARIANTS = {
+  0: "{{ all_products['perfora-purple-whitening-toothpaste'].selected_or_first_available_variant.id | default: '' }}",
+  1: "{{ all_products['perfora-activated-charcoal-whitening-toothpaste'].selected_or_first_available_variant.id | default: '' }}",
+  2: "{{ all_products['perfora-teeth-whitening-combo'].selected_or_first_available_variant.id | default: '' }}",
+  3: "{{ all_products['perfora-teeth-whitening-strips'].selected_or_first_available_variant.id | default: '' }}",
+  4: "{{ all_products['perfora-purple-teeth-whitening-strips'].selected_or_first_available_variant.id | default: '' }}",
+  5: "{{ all_products['perfora-purple-teeth-whitening-toothpaste-serum'].selected_or_first_available_variant.id | default: '' }}"
+};
+var SHOPIFY_STORE_DOMAIN = "{{ shop.permanent_domain | default: shop.domain }}";
+</script>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Perfora Purple Whitening Toothpaste</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">

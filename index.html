@@ -188,11 +188,93 @@ $('open').onclick=openD;$('close').onclick=closeAll;$('veil').onclick=closeAll;
 document.addEventListener('keydown',function(e){if(e.key=='Escape')closeAll()});
 function total(){var t=0;for(var k in C)t+=C[k]*P[k].p;return t}
 var ST=['Andaman and Nicobar Islands','Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chandigarh','Chhattisgarh','Dadra and Nagar Haveli and Daman and Diu','Delhi','Goa','Gujarat','Haryana','Himachal Pradesh','Jammu and Kashmir','Jharkhand','Karnataka','Kerala','Ladakh','Lakshadweep','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Puducherry','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal'];
+
+var SHOPIFY_STORE_DOMAIN = window.SHOPIFY_STORE_DOMAIN || '';
+var SHOPIFY_VARIANTS = window.SHOPIFY_VARIANTS || {
+  0: '', // 1. Perfora Purple Whitening Toothpaste, 75 g
+  1: '', // 2. Perfora Activated Charcoal Whitening Toothpaste, 100 g
+  2: '', // 3. Perfora Teeth Whitening Combo
+  3: '', // 4. Perfora Teeth Whitening Strips
+  4: '', // 5. Perfora Purple Teeth Whitening Strips
+  5: ''  // 6. Perfora Purple Teeth Whitening Toothpaste Serum, 30 ml
+};
+
+function checkoutShopify() {
+  var items = [];
+  var permalinks = [];
+  for (var k in C) {
+    if (C[k] > 0) {
+      var vid = SHOPIFY_VARIANTS[k];
+      if (vid) {
+        items.push({ id: String(vid), quantity: C[k] });
+        permalinks.push(vid + ':' + C[k]);
+      }
+    }
+  }
+
+  var isShopify = (typeof window.Shopify !== 'undefined') || window.location.hostname.includes('myshopify.com');
+
+  if (items.length > 0) {
+    if (isShopify) {
+      var btn = $('btn-shopify');
+      if (btn) btn.textContent = 'Redirecting to checkout...';
+      fetch('/cart/clear.js', { method: 'POST' })
+        .then(function() {
+          return fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: items })
+          });
+        })
+        .then(function() {
+          window.location.href = '/checkout';
+        })
+        .catch(function() {
+          window.location.href = '/cart/' + permalinks.join(',') + '?checkout';
+        });
+    } else {
+      var domain = SHOPIFY_STORE_DOMAIN;
+      if (domain) {
+        domain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        window.location.href = 'https://' + domain + '/cart/' + permalinks.join(',') + '?checkout';
+      } else {
+        var entered = prompt('Please enter your Shopify store URL to checkout (e.g. yourstore.myshopify.com):');
+        if (entered) {
+          entered = entered.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+          window.SHOPIFY_STORE_DOMAIN = entered;
+          window.location.href = 'https://' + entered + '/cart/' + permalinks.join(',') + '?checkout';
+        }
+      }
+    }
+  } else {
+    if (isShopify) {
+      // In Shopify, try fallback to /cart or show helper
+      window.location.href = '/cart';
+    } else {
+      var storeDomain = prompt('To connect your Shopify checkout, enter your store name (e.g. yourstore.myshopify.com):');
+      if (storeDomain) {
+        storeDomain = storeDomain.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+        window.location.href = 'https://' + storeDomain + '/cart';
+      } else {
+        var f = $('wa-drawer-form');
+        if (f) f.style.display = 'block';
+      }
+    }
+  }
+}
+
 function render(){$('cnt').textContent=count();var b=$('cartbody');
 if(!count()){b.innerHTML='<p>Your cart is empty. Pick a product to get started.</p><button class="btn dark" id="kb">Keep browsing</button>';$('kb').onclick=closeAll;return}
 var h='';for(var k in C){if(C[k]>0)h+='<div class="line"><img src="'+IM[P[k].i[0]]+'" alt=""><div style="flex:1"><b>'+P[k].s+'</b><br>₹'+P[k].p+' each</div><div class="qty"><button aria-label="Decrease" data-k="'+k+'" data-d="-1">−</button><span>'+C[k]+'</span><button aria-label="Increase" data-k="'+k+'" data-d="1">+</button></div></div>'}
-b.innerHTML=h+'<div class="tot"><span>Total</span><span>₹'+total()+'</span></div><p class="fine">Free delivery. We confirm your order on WhatsApp, then send a UPI payment link.</p>'+
-'<form id="f" novalidate><label for="n">Name</label><input id="n" autocomplete="name"><label for="ph">Contact number</label><input id="ph" inputmode="numeric" maxlength="10" autocomplete="tel"><label for="hs">House no. / Building name</label><input id="hs" autocomplete="address-line1"><label for="rd">Road name / Area / Colony</label><input id="rd" autocomplete="address-line2"><label for="pin">Pincode</label><input id="pin" inputmode="numeric" maxlength="6" autocomplete="postal-code"><div class="two"><div><label for="ct">City</label><input id="ct" autocomplete="address-level2"></div><div><label for="st">State</label><select id="st" autocomplete="address-level1"><option value="">Select</option>'+ST.map(function(s){return '<option>'+s+'</option>'}).join('')+'</select></div></div><label for="nb">Nearby famous place / shop / school (optional)</label><input id="nb"><div class="err" id="er"></div><button class="btn dark" style="width:100%" type="submit">Place order</button></form>';
+b.innerHTML=h+'<div class="tot"><span>Total</span><span>₹'+total()+'</span></div>'+
+'<p class="fine">✨ Free delivery across India. Fast checkout with UPI, Cards, NetBanking or Cash on Delivery.</p>'+
+'<button class="btn dark" id="btn-shopify" style="width:100%;font-size:16px;padding:15px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;font-weight:700;cursor:pointer"><span>Proceed to Checkout</span> 🔒</button>'+
+'<div style="text-align:center;margin:10px 0;position:relative"><span style="background:var(--card);padding:0 10px;color:var(--mute);font-size:12px;position:relative;z-index:1;text-transform:uppercase;letter-spacing:1px">or order via chat</span><div style="position:absolute;top:50%;left:0;right:0;border-top:1px solid var(--line)"></div></div>'+
+'<button class="btn" id="btn-wa-toggle" style="width:100%;background:#25D366;color:#fff;border-radius:14px;padding:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;cursor:pointer"><span>Order via WhatsApp</span> 💬</button>'+
+'<div id="wa-drawer-form" style="display:none;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px">'+
+'<form id="f" novalidate><label for="n">Name</label><input id="n" autocomplete="name"><label for="ph">Contact number</label><input id="ph" inputmode="numeric" maxlength="10" autocomplete="tel"><label for="hs">House no. / Building name</label><input id="hs" autocomplete="address-line1"><label for="rd">Road name / Area / Colony</label><input id="rd" autocomplete="address-line2"><label for="pin">Pincode</label><input id="pin" inputmode="numeric" maxlength="6" autocomplete="postal-code"><div class="two"><div><label for="ct">City</label><input id="ct" autocomplete="address-level2"></div><div><label for="st">State</label><select id="st" autocomplete="address-level1"><option value="">Select</option>'+ST.map(function(s){return '<option>'+s+'</option>'}).join('')+'</select></div></div><label for="nb">Nearby famous place / shop / school (optional)</label><input id="nb"><div class="err" id="er"></div><button class="btn dark" style="width:100%" type="submit">Send WhatsApp Order</button></form></div>';
+$('btn-shopify').onclick=checkoutShopify;
+$('btn-wa-toggle').onclick=function(){var f=$('wa-drawer-form');f.style.display=f.style.display==='none'?'block':'none'};
 [].forEach.call(b.querySelectorAll('[data-d]'),function(x){x.onclick=function(){var k=x.dataset.k;C[k]=Math.max(0,Math.min(10,C[k]+ +x.dataset.d));if(!C[k])delete C[k];save();render()}});
 $('f').onsubmit=function(e){e.preventDefault();var g=function(i){return $(i).value.trim()},n=g('n'),ph=g('ph'),hs=g('hs'),rd=g('rd'),pin=g('pin'),ct=g('ct'),st=$('st').value,nb=g('nb'),ad=hs+', '+rd+(nb?' (near '+nb+')':'')+', '+ct+', '+st;
 if(n.length<2)return $('er').textContent='Enter your name.';
